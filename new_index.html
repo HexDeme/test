@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CourseFlow | Modern Course Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#475569',
+                        accent: '#10b981',
+                        background: '#f8fafc',
+                        text: '#1e293b',
+                        textSecondary: '#64748b'
+                    },
+                    borderRadius: {
+                        'xl': '8px'
+                    },
+                    boxShadow: {
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .sidebar-transition {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-background">
+    <!-- Main Container -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar-transition w-64 bg-white shadow-card flex flex-col">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-text">CourseFlow</h1>
+                </div>
+            </div>
+            
+            <nav class="flex-1 p-4">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-xl bg-primary text-white">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-text hover:bg-gray-100">
+                            <i class="fas fa-book"></i>
+                            <span>Courses</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-text hover:bg-gray-100">
+                            <i class="fas fa-users"></i>
+                            <span>Students</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-text hover:bg-gray-100">
+                            <i class="fas fa-calendar"></i>
+                            <span>Schedule</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-text hover:bg-gray-100">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 p-3 rounded-xl text-text hover:bg-gray-100">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="p-4 border-t border-gray-100">
+                <div class="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 cursor-pointer">
+                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-user text-gray-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-text">Admin User</p>
+                        <p class="text-sm text-textSecondary">admin@courseflow.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="menu-toggle" class="p-2 rounded-lg hover:bg-gray-100">
+                            <i class="fas fa-bars text-text"></i>
+                        </button>
+                        <div class="relative">
+                            <input type="text" placeholder="Search courses..." class="pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-80">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button class="p-2 rounded-full hover:bg-gray-100 relative">
+                            <i class="fas fa-bell text-text"></i>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        <button class="p-2 rounded-full hover:bg-gray-100">
+                            <i class="fas fa-moon text-text"></i>
+                        </button>
+                        <button class="flex items-center space-x-2 bg-primary text-white px-4 py-2 rounded-xl">
+                            <i class="fas fa-plus"></i>
+                            <span>New Course</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dashboard Content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-text mb-2">Dashboard</h1>
+                    <p class="text-textSecondary">Welcome back! Here's what's happening with your courses today.</p>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="dashboard-grid mb-8">
+                    <div class="card-hover bg-white rounded-xl shadow-card p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-textSecondary text-sm mb-1">Total Courses</p>
+                                <h3 class="text-2xl font-bold text-text">24</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-blue-50">
+                                <i class="fas fa-book text-primary text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-green-500 text-sm flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 12% from last month
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover bg-white rounded-xl shadow-card p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-textSecondary text-sm mb-1">Active Students</p>
+                                <h3 class="text-2xl font-bold text-text">1,248</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-green-50">
+                                <i class="fas fa-users text-accent text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-green-500 text-sm flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 8% from last month
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover bg-white rounded-xl shadow-card p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-textSecondary text-sm mb-1">Assignments Due</p>
+                                <h3 class="text-2xl font-bold text-text">18</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-amber-50">
+                                <i class="fas fa-tasks text-amber-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-amber-500 text-sm">3 due today</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover bg-white rounded-xl shadow-card p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-textSecondary text-sm mb-1">Completion Rate</p>
+                                <h3 class="text-2xl font-bold text-text">78%</h3>
+                            </div>
+                            <div class="p-3 rounded-lg bg-purple-50">
+                                <i class="fas fa-chart-line text-purple-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-green-500 text-sm flex items-center">
+                                <i class="fas fa-arrow-up mr-1"></i> 5% from last month
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts and Tables Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Enrollment Chart -->
+                    <div class="lg:col-span-2 card-hover bg-white rounded-xl shadow-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-semibold text-text">Enrollment Trends</h2>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-sm rounded-lg bg-gray-100 text-text">Month</button>
+                                <button class="px-3 py-1 text-sm rounded-lg text-textSecondary">Quarter</button>
+                                <button class="px-3 py-1 text-sm rounded-lg text-textSecondary">Year</button>
+                            </div>
+                        </div>
+                        <div class="h-64 flex items-end space-x-2">
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="w-full bg-gray-100 rounded-t-md" style="height: 180px;">
+                                    <div class="w-full bg-primary rounded-t-md" style="height: 60%;"></div>
+                                </div>
+                                <p class="text-xs text-textSecondary mt-2">Jan</p>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="w-full bg-gray-100 rounded-t-md" style="height: 180px;">
+                                    <div class="w-full bg-primary rounded-t-md" style="height: 75%;"></div>
+                                </div>
+                                <p class="text-xs text-textSecondary mt-2">Feb</p>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="w-full bg-gray-100 rounded-t-md" style="height: 180px;">
+                                    <div class="w-full bg-primary rounded-t-md" style="height: 85%;"></div>
+                                </div>
+                                <p class="text-xs text-textSecondary mt-2">Mar</p>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="w-full bg-gray-100 rounded-t-md" style="height: 180px;">
+                                    <div class="w-full bg-primary rounded-t-md" style="height: 90%;"></div>
+                                </div>
+                                <p class="text-xs text-textSecondary mt-2">Apr</p>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="w-full bg-gray-100 rounded-t-md" style="height: 180px;">
+                                    <div class="w-full bg-primary rounded-t-md" style="height: 80%;"></div>
+                                </div>
+                                <p class="text-xs text-textSecondary mt-2">May</p>
+                            </div>
+                            <div class="flex-1 flex flex-col items-center">
+                                <div class="w-full bg-gray-100 rounded-t-md" style="height: 180px;">
+                                    <div class="w-full bg-primary rounded-t-md" style="height: 95%;"></div>
+                                </div>
+                                <p class="text-xs text-textSecondary mt-2">Jun</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="card-hover bg-white rounded-xl shadow-card p-6">
+                        <h2 class="text-lg font-semibold text-text mb-6">Recent Activity</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                    <i class="fas fa-check text-green-500 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-text font-medium">Assignment submitted</p>
+                                    <p class="text-textSecondary text-sm">Alex Johnson completed "Web Design Principles"</p>
+                                    <p class="text-textSecondary text-xs mt-1">2 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-user-plus text-blue-500 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-text font-medium">New enrollment</p>
+                                    <p class="text-textSecondary text-sm">Sarah Miller enrolled in "Data Science Fundamentals"</p>
+                                    <p class="text-textSecondary text-xs mt-1">5 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <i class="fas fa-comment text-purple-500 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-text font-medium">New discussion post</p>
+                                    <p class="text-textSecondary text-sm">Michael posted in "Advanced JavaScript"</p>
+                                    <p class="text-textSecondary text-xs mt-1">Yesterday</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-amber-500 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-text font-medium">Assignment overdue</p>
+                                    <p class="text-textSecondary text-sm">Robert missed "Mobile App Project"</p>
+                                    <p class="text-textSecondary text-xs mt-1">Yesterday</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Courses Table -->
+                <div class="card-hover bg-white rounded-xl shadow-card p-6 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold text-text">Your Courses</h2>
+                        <div class="flex space-x-2">
+                            <button class="px-4 py-2 rounded-lg border border-gray-200 text-text flex items-center">
+                                <i class="fas fa-filter mr-2"></i> Filter
+                            </button>
+                            <button class="px-4 py-2 rounded-lg bg-primary text-white flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Create Course
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-100">
+                                    <th class="pb-4 text-left text-text font-semibold">Course Name</th>
+                                    <th class="pb-4 text-left text-text font-semibold">Students</th>
+                                    <th class="pb-4 text-left text-text font-semibold">Progress</th>
+                                    <th class="pb-4 text-left text-text font-semibold">Status</th>
+                                    <th class="pb-4 text-left text-text font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                                                <i class="fas fa-code text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-text">Advanced JavaScript</p>
+                                                <p class="text-textSecondary text-sm">John Smith</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-text">124 students</td>
+                                    <td class="py-4">
+                                        <div class="progress-bar bg-gray-200 w-32">
+                                            <div class="progress-fill bg-primary" style="width: 75%"></div>
+                                        </div>
+                                        <p class="text-textSecondary text-sm mt-1">75% completed</p>
+                                    </td>
+                                    <td class="py-4">
+                                        <span class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-800">Active</span>
+                                    </td>
+                                    <td class="py-4">
+                                        <button class="p-2 rounded-lg hover:bg-gray-100 text-text">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                                                <i class="fas fa-paint-brush text-purple-500"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-text">UI/UX Design Fundamentals</p>
+                                                <p class="text-textSecondary text-sm">Emily Davis</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-text">89 students</td>
+                                    <td class="py-4">
+                                        <div class="progress-bar bg-gray-200 w-32">
+                                            <div class="progress-fill bg-primary" style="width: 45%"></div>
+                                        </div>
+                                        <p class="text-textSecondary text-sm mt-1">45% completed</p>
+                                    </td>
+                                    <td class="py-4">
+                                        <span class="px-3 py-1 rounded-full text-xs bg-amber-100 text-amber-800">In Progress</span>
+                                    </td>
+                                    <td class="py-4">
+                                        <button class="p-2 rounded-lg hover:bg-gray-100 text-text">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                                                <i class="fas fa-database text-green-500"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-text">Database Management</p>
+                                                <p class="text-textSecondary text-sm">Robert Brown</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-text">156 students</td>
+                                    <td class="py-4">
+                                        <div class="progress-bar bg-gray-200 w-32">
+                                            <div class="progress-fill bg-primary" style="width: 90%"></div>
+                                        </div>
+                                        <p class="text-textSecondary text-sm mt-1">90% completed</p>
+                                    </td>
+                                    <td class="py-4">
+                                        <span class="px-3 py-1 rounded-full text-xs bg-green-100 text-green-800">Active</span>
+                                    </td>
+                                    <td class="py-4">
+                                        <button class="p-2 rounded-lg hover:bg-gray-100 text-text">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="hover:bg-gray-50">
+                                    <td class="py-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mr-3">
+                                                <i class="fas fa-mobile-alt text-red-500"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-text">Mobile App Development</p>
+                                                <p class="text-textSecondary text-sm">Lisa Wilson</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-text">78 students</td>
+                                    <td class="py-4">
+                                        <div class="progress-bar bg-gray-200 w-32">
+                                            <div class="progress-fill bg-primary" style="width: 30%"></div>
+                                        </div>
+                                        <p class="text-textSecondary text-sm mt-1">30% completed</p>
+                                    </td>
+                                    <td class="py-4">
+                                        <span class="px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-800">Draft</span>
+                                    </td>
+                                    <td class="py-4">
+                                        <button class="p-2 rounded-lg hover:bg-gray-100 text-text">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Assignments -->
+                <div class="card-hover bg-white rounded-xl shadow-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-semibold text-text">Upcoming Assignments</h2>
+                        <button class="text-primary text-sm font-medium">View All</button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-red-500 mr-4"></div>
+                                <div>
+                                    <p class="font-medium text-text">Final Project Submission</p>
+                                    <p class="text-textSecondary text-sm">Advanced JavaScript • Due in 2 days</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">High</span>
+                                <button class="p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-chevron-right text-textSecondary"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-amber-500 mr-4"></div>
+                                <div>
+                                    <p class="font-medium text-text">Midterm Exam</p>
+                                    <p class="text-textSecondary text-sm">Database Management • Due next week</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-800">Medium</span>
+                                <button class="p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-chevron-right text-textSecondary"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-green-500 mr-4"></div>
+                                <div>
+                                    <p class="font-medium text-text">Design Prototype</p>
+                                    <p class="text-textSecondary text-sm">UI/UX Design Fundamentals • Due in 3 weeks</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">Low</span>
+                                <button class="p-2 rounded-lg hover:bg-gray-100">
+                                    <i class="fas fa-chevron-right text-textSecondary"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('w-64');
+            sidebar.classList.toggle('-translate-x-full');
+        });
+        
+        // Simulate loading states
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.querySelectorAll('.animate-pulse-slow').forEach(el => {
+                    el.classList.remove('animate-pulse-slow');
+                });
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
